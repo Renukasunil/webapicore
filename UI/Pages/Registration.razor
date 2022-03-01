@@ -1,0 +1,142 @@
+﻿@page "/registration"
+@using LMS.Model
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Net.Http.Json
+@inject NavigationManager NavigationManager
+
+<EditForm Model="@clientInfo">
+  <DataAnnotationsValidator />
+  <ValidationSummary />
+  <div class="container" style="width: 600px;">
+    <h2>Client Registration</h2>
+    <hr>
+    <label for="name"><b>Name</b></label>
+    <input type="text" placeholder="Enter Name" name="name" @bind="clientInfo.Name" required>
+
+    <label for="mob"><b>Mobile No</b></label>
+    <input type="text" placeholder="Enter Mobile number" name="mobile" @bind="clientInfo.Mobile" required>
+
+    <label for="email"><b>Email Id</b></label>
+    <input type="text" placeholder="Enter Email Id" name="emailid" @bind="clientInfo.EmailId" required>
+
+    <label for="orgname"><b>Organization Name</b></label>
+    <input type="text" placeholder="Enter OrganizationName" @bind="clientInfo.OrganizationName" name="organizationname"
+      required>
+
+    <label for="addr"><b>Address</b></label>
+    <input type="text" placeholder="Enter Address" @bind="clientInfo.Address" name="address" required>
+
+    <label for="count"><b>Country</b></label>
+    @* <input type="text" placeholder="Enter Country" name="country" required> *@
+    <select @bind="clientInfo.Country" Data="lstcountry">
+      <optio selected value="">--Select Country--</optio>
+      @foreach (var country in lstcountry)
+      {
+        <option value="@country.CountryId">@country.CountryName</option>
+      }
+
+    </select>
+    <label for="state"><b>State</b></label>
+    @* <input type="text" placeholder="Enter State" name="state" required> *@
+    <select @bind="clientInfo.Country" Data="lststate">
+      <optio selected value="">--Select state--</optio>
+      @foreach (var country in lststate)
+      {
+        <option value="@country.StateId">@country.StateName</option>
+      }
+    </select>
+
+    <label for="city"><b>City</b></label>
+    @* <input type="text" placeholder="Enter City" name="city" required> *@
+    <select @bind="clientInfo.Country" Data="lstcity">
+      <optio selected value="">--Select city--</optio>
+      @foreach (var country in lstcity)
+      {
+        <option value="@country.CityId">@country.CityName</option>
+      }
+    </select>
+
+    <label for="pin"><b>pin</b></label>
+    <input type="text" placeholder="Enter Pin" @bind="clientInfo.Pin" name="pin" required>
+
+    <label for="typeoforg"><b>TypeOfOrganization</b></label>
+    <input type="text" placeholder="Enter TypeOfOrganization" @bind="clientInfo.TypeOfOrganization"
+      name="typeoforganization" required>
+
+    <label for="oth"><b>Other</b></label>
+    <input type="text" placeholder="Enter Other" @bind="clientInfo.Other" name="other" required>
+
+    <label for="ownname"><b>Owner Name</b></label>
+    <input type="text" placeholder="Enter OwnerName" @bind="clientInfo.OwnerName" name="ownername" required>
+
+    <label for="owncontactno"><b>OwnerContactNo</b></label>
+    <input type="text" placeholder="Enter OwnerContactNo" @bind="clientInfo.OwnerContactNo" name="ownercontactno"
+      required>
+
+    <label for="ownemailid"><b>OwnerEmailId</b></label>
+    <input type="text" placeholder="Enter OwnerEmailId" @bind="clientInfo.OwnerContactNo" name="owneremailid" required>
+
+    <label for="gno"><b>GSTNO</b></label>
+    <input type="text" placeholder="Enter GSTNO" @bind="clientInfo.GSTNO" name="gstno" required>
+
+    <div class="clearfix">
+      <button class="registerbtn" @onclick="CallRegistration">Register</button>
+      <button type="reset" class="cancelbtn">Reset</button>
+    </div>
+  </div>
+</EditForm>
+@code {
+  UserInfo clientInfo = new UserInfo();// This is actually Client
+  private void RestRegistration()
+  {
+    clientInfo = new UserInfo();
+  }
+  List<Country> lstcountry = new List<Country>{
+new Country(){CountryId=0,CountryName="--Select Country--"},
+new Country(){CountryId=1,CountryName="India"},
+new Country(){CountryId=2,CountryName="USA"},
+};
+  List<State> lststate = new List<State>{
+new State(){StateId=0,StateName="--State State--"},
+new State(){StateId=1,StateName="UP"},
+new State(){StateId=2,StateName="MP"},
+};
+  List<City> lstcity = new List<City>{
+new City(){CityId=0,CityName="--State City--"},
+new City(){CityId=1,CityName="Noida"},
+new City(){CityId=2,CityName="Mumbai"},
+};
+  private async void CallRegistration()
+  {
+    Console.WriteLine($"CallRegistration");
+    HttpClient client = new HttpClient();
+    //just checking get request
+    var response = await client.GetFromJsonAsync("http://backend/api/User", typeof(IEnumerable<string>));
+    Console.WriteLine($"response data is {response}");
+    var apiName = "http://backend/api/Client/UserRegistration";
+    //var postData = JsonSerializer.Serialize<LMS.Model.UserInfo>(userInfo);
+    var httpResponse = await client.PostAsJsonAsync(apiName, clientInfo);
+    Console.WriteLine($"CallRegistration api done");
+    if (httpResponse.IsSuccessStatusCode)
+    {
+      Console.WriteLine($"CallRegistration api success{httpResponse}");
+      var responseData = await httpResponse.Content.ReadFromJsonAsync<EventInfo>();
+      Console.WriteLine($"response data is {responseData}");
+      @* = JsonConvert.DeserializeObject<EventInfo>(await httpResponse.Content.ReadAsStringAsync()); *@
+      //TODO : Redirect the user to Login @Pooja
+      Console.WriteLine(clientInfo.Name);
+      string UserID = clientInfo.EmailId;
+      string url = $"verifyotp/{UserID}";
+      //string url = UserID == "" ? "" : "verifyotp/" + UserID;
+      NavigationManager.NavigateTo(url);
+      // NavigationManager.NavigateTo("verifyotp");
+      StateHasChanged();
+    }
+    else
+    {
+      Console.WriteLine($"httpResponse is {httpResponse}");
+    }
+  }
+
+}

@@ -1,0 +1,34 @@
+﻿@page "/login"
+@using LMS.Model
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <h2>Login Form</h2>
+
+    <label for="uname">
+        <b>Username</b>
+    </label>
+    <input type="text" @bind-value="@_login.UserId" placeholder="Enter Username" name="uname" required>
+    <label for="psw">
+        <b>Password</b>
+    </label>
+    <input type="password" @bind-value="@_login.Password" placeholder="Enter Password" name="psw" required>
+    <div style="padding: 12px 0px;">
+        <label>
+            <input type="checkbox" checked="checked" name="remember">Remember me
+        </label>
+    </div>
+    <button class="btn btn-primary" @onclick="CallLogin">Login</button>
+
+
+</div>
+
+@code {
+    string UserName = string.Empty;
+    string Password = string.Empty;
+    LMS.Model.Login _login = new LMS.Model.Login();
+    private  void CallLogin()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

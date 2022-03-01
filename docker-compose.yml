@@ -1,0 +1,45 @@
+version: "3.4"
+
+services:
+  backend:
+    image: backend
+    build: 
+      context: .
+      dockerfile: LMS.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DB_CONNECTION_STRING="${DB_CONNECTION_STRING}"
+      #- DB_CONNECTION_STRING: "host=postgres;port=5432;database=LMSTESTING;username=bloguser;password=bloguser"
+    ports: 
+      - "5000:80"
+    depends_on: 
+      - postgres
+  
+  ui:
+    image: ui
+    build:
+      context: .
+      dockerfile: UI/Dockerfile
+    environment: 
+      - backendUrl=http://backend
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5001:80"
+    depends_on: 
+      - backend
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432"
+    # restart: always
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+      # - ./dbscripts/seed.sql :/docker-entrypoint-initdb.d/seed.sql
+    environment:
+      POSTGRES_USER: "bloguser"
+      POSTGRES_PASSWORD: "bloguser"
+      POSTGRES_DB: "LMSTESTING"
+
+volumes:
+  db_volume:

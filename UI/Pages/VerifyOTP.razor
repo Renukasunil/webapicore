@@ -1,0 +1,44 @@
+@page "/verifyOTP"
+@page "/verifyotp/{UserId}"
+@using LMS.Model
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <input type="hidden" @bind="obj.EmailId" />
+    <label for="uname">
+        <b>VerifyOTP</b>
+    </label>
+    <input type="text" placeholder="Enter VerifyOTP" @bind-value="@OTP" required>
+    <button class="btn btn-primary" @onclick="VerifyOTPSend">VerifyOTP</button>
+</div>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; } = default!;
+    public string OTP{get;set;}=default!;
+    UserInfo obj = new UserInfo();
+    protected override void OnInitialized()
+    {
+        obj.EmailId = UserId;
+    }
+    private async void VerifyOTPSend()
+    {
+       
+        HttpClient client = new HttpClient();
+        var apiName = "http://backend/api/Client/verifyOTP?Userid="+obj.EmailId+"&otp="+OTP;
+        var httpResponse = await client.GetAsync(apiName);
+        Console.WriteLine($"Call verify api done");
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Call verifyapi success{httpResponse}");
+            var responseData = await httpResponse.Content.ReadFromJsonAsync<EventInfo>();
+            Console.WriteLine($"response data is {responseData}");
+            NavigationManager.NavigateTo("Login");
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine($"httpResponse is {httpResponse}");
+        }
+    }
+}

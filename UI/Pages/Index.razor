@@ -1,0 +1,19 @@
+﻿@page "/"
+@* @page "/Home/{UserId}" *@
+
+<PageTitle>Index</PageTitle>
+@* @if(UserId!=null)
+{
+    <h1>Hi, @UserId ,You have been susccessfully authenticated!</h1>
+} *@
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+@functions {
+    // Define a property to contain the parameter passed from the auth page
+    [Parameter]
+    public string UserId { get; set; }
+}

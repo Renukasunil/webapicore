@@ -1,0 +1,91 @@
+@page "/product"
+@using LMS.Model
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Microsoft.AspNetCore.WebUtilities; 
+@using System.Net.Http.Json
+@inject NavigationManager NavigationManager
+
+
+  <div class="container" style="width: 600px;">
+    <h2>Product</h2>
+    <hr>
+
+<button @onclick="Navigate"></button>
+
+<h4>Product Name : @name </h4>
+<h5>Product Code : @productcode </h5>
+<h5>Product Version : @version </h5>
+
+</div>
+<div>
+  <label for="mob"><b>Mobile No</b></label>
+    <input type="text" placeholder="Enter Mobile number" name="mobile"  required>
+  <button> Proceed to Payment</button>
+
+</div>
+
+
+@code {
+  UserInfo clientInfo = new UserInfo();// This is actually Client
+   string name { get; set; }
+   string productcode  {get;set;}
+   string version {get;set;}
+    void Navigate()
+    {
+        var query = new Dictionary<string, string> { { "name", "Yomark" } };
+        NavigationManager.NavigateTo(QueryHelpers.AddQueryString(NavigationManager.Uri, query));
+        
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("name", out var param))
+        {
+            name = param.First();
+            code ="1234";
+            version ="1" ;
+
+        }
+    }
+
+  
+  /*private void NavigateToComponent()  
+{
+  
+    var query = new Dictionary<string, string> {  
+        { "name", "Yomark" }
+    };  
+   NavigationManager.NavigateTo(QueryHelpers.AddQueryString("/productname", query));  
+}  */
+  private async void CallRegistration()
+  {
+    Console.WriteLine($"CallRegistration");
+    HttpClient client = new HttpClient();
+    //just checking get request
+    var response = await client.GetFromJsonAsync("http://backend/api/User", typeof(IEnumerable<string>));
+    Console.WriteLine($"response data is {response}");
+    var apiName = "http://backend/api/Client/UserRegistration";
+    //var postData = JsonSerializer.Serialize<LMS.Model.UserInfo>(userInfo);
+    var httpResponse = await client.PostAsJsonAsync(apiName, clientInfo);
+    Console.WriteLine($"CallRegistration api done");
+    if (httpResponse.IsSuccessStatusCode)
+    {
+      Console.WriteLine($"CallRegistration api success{httpResponse}");
+      var responseData = await httpResponse.Content.ReadFromJsonAsync<EventInfo>();
+      Console.WriteLine($"response data is {responseData}");
+      @* = JsonConvert.DeserializeObject<EventInfo>(await httpResponse.Content.ReadAsStringAsync()); *@
+      //TODO : Redirect the user to Login @Pooja
+      Console.WriteLine(clientInfo.Name);
+      string UserID = clientInfo.EmailId;
+      string url = $"verifyotp/{UserID}";
+      //string url = UserID == "" ? "" : "verifyotp/" + UserID;
+      NavigationManager.NavigateTo(url);
+      // NavigationManager.NavigateTo("verifyotp");
+      StateHasChanged();
+    }
+    else
+    {
+      Console.WriteLine($"httpResponse is {httpResponse}");
+    }
+  }
+
+}

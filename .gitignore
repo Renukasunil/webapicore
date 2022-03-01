@@ -1,0 +1,16 @@
+LMS.API/obj/
+LMS.API/bin/
+LMS.Model/bin/
+LMS.Model/obj/
+LMS.Service/bin/
+LMS.Service/obj/
+LMS.UI/bin/
+LMS.UI/obj/
+UI/obj/
+UI/bin/
+LMS.Data/bin/
+LMS.Data/obj/
+.fake
+.ionide
+LMS.Data/bin/
+LMS.Data/obj/
